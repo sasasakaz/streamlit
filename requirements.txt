@@ -4,4 +4,3 @@ numpy
 matplotlib
 pymc
 arviz
-itertools
