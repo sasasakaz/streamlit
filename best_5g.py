@@ -8,7 +8,7 @@ import re
 import itertools
 
 # --- ページ設定 ---
-st.set_page_config(page_title="Bayesian Estimation of the Difference in Means", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Bayesian Estimation of the Difference in Means", layout="wide", initial_sidebar_state="auto")
 st.title("📊 平均の差のベイズ推定")
 
 # --- サイドバー：データ入力 ---
@@ -41,7 +41,7 @@ with st.sidebar:
     with col1:
         st.button("⚡️ サンプルデータを入力する", on_click=set_sample, use_container_width=True)
     with col2:
-        st.button("🗑️ clear", on_click=clear_all)
+        st.button("🗑️ clear all", on_click=clear_all, use_container_width=True)
 
     x_list = []
     for name in group_names:
