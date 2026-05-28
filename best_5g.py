@@ -292,12 +292,36 @@ if 'trace' in st.session_state:
 
         with st.expander("Summary"):
             st.markdown("""
-            - 目安として、r_hatが1.05以下（理想は1.00）、mcse_meanが0.01以下またはパラメータのsdの5%以下（できれば2%以下）、ess_bulkとess_tailが400以上（できれば数千）あれば概ね問題ないと考えてください。
+            - 目安として、r_hatが1.05以下（理想は1.00）、mcse_meanが0.01以下（パラメータの変動範囲が0〜1の場合）またはパラメータのsdの5%以下（できれば2%以下）、ess_bulkとess_tailが400以上（できれば数千）あれば概ね問題ないと考えてください。
             """)
             # var_names を指定して基本パラメータのみプロットする（Deterministicなdiff_varsを除外）
             main_params = mu_vars + [f"std_{name}" for name in current_groups] + ["nu"]
+
+            st.markdown("#### 基本パラメータの要約統計量")
             # st.dataframe(az.summary(trace))        
             st.dataframe(az.summary(trace, var_names=main_params))
+
+            st.write("---")
+
+            # mcse_meanが各パラメーターの標準偏差の5%以下（できれば2%以下）という基準値に収まっているかをチェック
+            st.markdown("#### MCSE(mean) / SD 比率チェック")
+            st.markdown("""
+            - `mcse_mean / sd (%)` が5%以下（できれば2%以下）という基準値に収まっているか確認してください。
+            """)
+
+            # コピーを作成して加工
+            check_df = az.summary(trace, var_names=main_params).copy()
+            check_df['mcse_mean / sd'] = check_df['mcse_mean'] / check_df['sd']
+            check_df['mcse_mean / sd (%)'] = check_df['mcse_mean / sd'] * 100
+            # 必要な列だけ抽出
+            output_df = check_df[['sd', 'mcse_mean', 'mcse_mean / sd', 'mcse_mean / sd (%)']]
+
+            st.dataframe(output_df.style.format({
+                'sd': '{:.1f}',
+                'mcse_mean': '{:.3f}',
+                'mcse_mean / sd': '{:.4f}',
+                'mcse_mean / sd (%)': '{:.2f}%'
+            }))
 
         with st.expander("Trace Plot"):
             st.markdown("""
