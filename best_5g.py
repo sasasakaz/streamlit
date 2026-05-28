@@ -8,7 +8,7 @@ import re
 import itertools
 
 # --- ページ設定 ---
-st.set_page_config(page_title="Bayesian Estimation of the Difference in Means", layout="wide", initial_sidebar_state="auto")
+st.set_page_config(page_title="Bayesian Estimation of the Difference in Means", layout="wide", initial_sidebar_state="expanded")
 st.title("📊 平均の差のベイズ推定")
 
 # --- サイドバー：データ入力 ---
@@ -132,7 +132,7 @@ if st.button("🚀 Click to Estimate"):
                 # 入力があった群の数だけループを回す
                 for i, name in enumerate(valid_group_names):
                     mu = pm.Normal(f'mu_{name}', mu=pooled_mean, sigma=pooled_std)
-                    std = pm.Uniform(f'std_{name}', lower=0.1, upper=10)
+                    std = pm.Uniform(f'std_{name}', lower=pooled_std * 0.001, upper=pooled_std * 10)
                     
                     pm.StudentT(f'obs_{name}', mu=mu, sigma=std, nu=nu, observed=valid_x_list[i])
                     
@@ -262,7 +262,7 @@ if 'trace' in st.session_state:
             for j in range(num_diffs, len(axes)):
                 axes[j].axis("off")
 
-            plt.suptitle("Detail: Absolute Difference", fontsize=20)
+            plt.suptitle("Detail: Difference in Average", fontsize=20)
             plt.tight_layout()
             st.pyplot(fig)
 
@@ -292,7 +292,7 @@ if 'trace' in st.session_state:
 
         with st.expander("Summary"):
             st.markdown("""
-            - 目安として、r_hatが1.1以下、mcse_meanが0.01以下、ess_bulkが400以上であれば概ね問題ないと考えてください。
+            - 目安として、r_hatが1.05以下（理想は1.00）、mcse_meanが0.01以下またはパラメータのsdの5%以下（できれば2%以下）、ess_bulkとess_tailが400以上（できれば数千）あれば概ね問題ないと考えてください。
             """)
             # var_names を指定して基本パラメータのみプロットする（Deterministicなdiff_varsを除外）
             main_params = mu_vars + [f"std_{name}" for name in current_groups] + ["nu"]
